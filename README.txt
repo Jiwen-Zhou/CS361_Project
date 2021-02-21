@@ -7,7 +7,7 @@ Important lines for forking:
 	call (["python", "life-generator.py", "1", "2")]
 
 	-this is how our programs will communicate
-	-your program will call this to run my program
+	-my program will call this to run your program, vice verca
 	-it's basically typing into the command line:
 
 		python life-generator.py 1 2
