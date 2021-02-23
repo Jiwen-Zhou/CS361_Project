@@ -37,4 +37,5 @@ My output.csv headers:
 
 So, we'll both have to import each other's programs into our own folders,
 then when one of them gets forked, it'll produce an output file, and the original 
-program will use that.
+program will use that. We'll also have to import the required input csv files. I put up my ak.csv
+for when your program forks mine.
