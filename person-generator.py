@@ -32,6 +32,7 @@ class MainWindow:
 		self.window = tkinter.Tk()
 		self.window.geometry("850x500")
 		self.passed_csv = passed_csv
+		self.toys_selected = False
 
 		# widget creation
 		self.create_button = tkinter.Button(text="Create Dataset", font=(None, 12), height=3, width=30,
@@ -70,152 +71,13 @@ class MainWindow:
 		else:
 			self.input_received.place(x=47, y=175)
 
-	def create_click(self):
+	def read_file(self, input_file, array, file_type):
 		"""
-		this function reads from the selected CSV state file
-		and writes data to output.csv
+		this functions reads from the passed file (file_name)
+		and writes appropriate data to array (array)
 		"""
-
-		#### this part needs to be edited ####
-		if self.toy_choice_box.get() == "Yes":
-			call(["python", "life-generator.py", "1", "2"])
-
-
-
-		# reset the display box
-		self.display_generated.delete('0', 'end')
-
-		# create the seed for generating random numbers
-		seed(datetime.now())
-
-		# create variables
-		input_file = ""
-		output_file = "output.csv"
-		address_array = []
-		created_array = []
-		max_size = 9999
-		state_ac = ""
-		content_type = "street address"
-		current_address = ""
 		counter = 0
 		first_row = True
-
-		# check if user ran program normally or passed in input CSV
-		if self.passed_csv == 1:
-			# run program normally
-
-			# check if required data is provided, return if it isn't
-			if len(self.s_state.get()) == 0 or len(self.s_number.get()) == 0:
-				self.display_generated.insert(0, "Please make selections before creating dataset")
-				return
-
-			# create variables specific to normal program run
-			total = int(self.s_number.get())
-
-			# check which state was selected
-			selected_state = self.s_state.get()
-
-			if selected_state == "Alaska":
-				input_file = "ak.csv"
-				state_ac = "AK"
-			elif selected_state == "Arizona":
-				input_file = "az.csv"
-				state_ac = "AZ"
-			elif selected_state == "California":
-				input_file = "ca.csv"
-				state_ac = "CA"
-			elif selected_state == "Colorado":
-				input_file = "co.csv"
-				state_ac = "CO"
-			elif selected_state == "Hawaii":
-				input_file = "hi.csv"
-				state_ac = "HI"
-			elif selected_state == "Idaho":
-				input_file = "id.csv"
-				state_ac = "ID"
-			elif selected_state == "Montana":
-				input_file = "mt.csv"
-				state_ac = "MT"
-			elif selected_state == "New Mexico":
-				input_file = "nm.csv"
-				state_ac = "NM"
-			elif selected_state == "Nevada":
-				input_file = "nv.csv"
-				state_ac = "NV"
-			elif selected_state == "Oregon":
-				input_file = "or.csv"
-				state_ac = "OR"
-			elif selected_state == "Utah":
-				input_file = "ut.csv"
-				state_ac = "UT"
-			elif selected_state == "Washington":
-				input_file = "wa.csv"
-				state_ac = "WA"
-			elif selected_state == "Wyoming":
-				input_file = "wy.csv"
-				state_ac = "WY"
-		else:
-			# user passed in CSV
-			row_one = True
-			csv_state = ""
-
-			# get the selected state and total from input.csv
-			with open(sys.argv[1]) as input_csv:
-				read_file = csv.reader(input_csv, delimiter=",")
-				for row in read_file:
-					# check if reader is on the header row
-					if row_one is True:
-						row_one = False
-						continue
-
-					csv_state = row[0]
-					total = int(row[1])
-
-			# match the state with the state csv file
-			if csv_state == "AK":
-				input_file = "ak.csv"
-				state_ac = "AK"
-			elif csv_state == "AZ":
-				input_file = "az.csv"
-				state_ac = "AZ"
-			elif csv_state == "CA":
-				input_file = "ca.csv"
-				state_ac = "CA"
-			elif csv_state == "CO":
-				input_file = "co.csv"
-				state_ac = "CO"
-			elif csv_state == "HI":
-				input_file = "hi.csv"
-				state_ac = "HI"
-			elif csv_state == "ID":
-				input_file = "id.csv"
-				state_ac = "ID"
-			elif csv_state == "MT":
-				input_file = "mt.csv"
-				state_ac = "MT"
-			elif csv_state == "NM":
-				input_file = "nm.csv"
-				state_ac = "NM"
-			elif csv_state == "NV":
-				input_file = "nv.csv"
-				state_ac = "NV"
-			elif csv_state == "OR":
-				input_file = "or.csv"
-				state_ac = "OR"
-			elif csv_state == "UT":
-				input_file = "ut.csv"
-				state_ac = "UT"
-			elif csv_state == "WA":
-				input_file = "wa.csv"
-				state_ac = "WA"
-			elif csv_state == "WY":
-				input_file = "wy.csv"
-				state_ac = "WY"
-			else:
-				# print an error message to the generated data listbox
-				self.display_generated.insert(0, "Incorrect data entered. Please enter your state")
-				self.display_generated.insert(1, "as a two-letter abbreviation, followed by amount.")
-				return
 
 		# read the CSV file selected, created an address array to pull from
 		with open(input_file) as file_data:
@@ -227,59 +89,170 @@ class MainWindow:
 					first_row = False
 					continue
 
-				# add the current address to address array
-				current_address = row[2]
-				current_address += ' '
-				current_address += row[3]
-				address_array.append(current_address)
-				counter += 1
-				if counter >= max_size:
+				if file_type == "address_file":
+					# add the current address to address array
+					current_address = row[2]
+					current_address += ' '
+					current_address += row[3]
+					array.append(current_address)
+					counter += 1
+				elif file_type == "input_csv":
+					array.append(row[0])
+					array.append(row[1])
+				elif file_type == "toy_file":
+					array.append(row[0])
+					counter += 1
+
+				if counter >= 9999:
 					break
 
-			# write the data to output file, and to created_array for GUI display
-			with open(output_file, mode='w', newline='') as output_csv:
+	def set_state(self, selected_state):
+		"""
+		this function sets the proper values for
+		the input_file and state_ac variables depending
+		on what's passed for selected
+		"""
+		if selected_state == "Alaska":
+			return "ak.csv", "AK"
+		elif selected_state == "Arizona":
+			return "az.csv", "AZ"
+		elif selected_state == "California":
+			return "ca.csv", "CA"
+		elif selected_state == "Colorado":
+			return "co.csv", "CO"
+		elif selected_state == "Hawaii":
+			return "hi.csv", "HI"
+		elif selected_state == "Idaho":
+			return "id.csv", "ID"
+		elif selected_state == "Montana":
+			return "mt.csv", "MT"
+		elif selected_state == "New Mexico":
+			return "nm.csv", "NM"
+		elif selected_state == "Nevada":
+			return "nv.csv", "NV"
+		elif selected_state == "Oregon":
+			return "or.csv", "OR"
+		elif selected_state == "Utah":
+			return "ut.csv", "UT"
+		elif selected_state == "Washington":
+			return "wa.csv", "WA"
+		elif selected_state == "Wyoming":
+			return "wy.csv", "WY"
+		else:
+			# print an error message to the generated data listbox
+			self.display_generated.insert(0, "Incorrect data entered.")
 
-				# write the header to the file
-				writer = csv.writer(output_csv, delimiter=",")
+	def check_index(self, index):
+		"""
+		this function takes an index in an array and checks
+		if it has usable data
+		"""
+		if index == 0:
+			return False
+		elif index.find('-') != -1:
+			return False
+		elif ord(index[0]) < 49 or ord(index[0]) > 57:
+			return False
+		elif index.find('.') != -1:
+			return False
+		elif len(index) < 5:
+			return False
+		elif index.find('&') != -1:
+			return False
+		elif index == ' ':
+			return False
+		elif index[len(index) - 2] == ' ':
+			return False
+		elif index[len(index) - 1] == 'E':
+			return False
+		elif index[len(index) - 1] == 'W':
+			return False
+		elif len(index) != 0:
+			return True
+
+	def create_click(self):
+		"""
+		this function reads from the selected CSV state file
+		and writes data to output.csv
+		"""
+
+		# reset the display box
+		self.display_generated.delete('0', 'end')
+
+		# create variables + seed
+		seed(datetime.now())
+		output_file = "output.csv"
+		csv_input_array = []
+		address_array = []
+		created_array = []
+		toy_array = []
+		content_type = "street address"
+
+		# check if user wants to see what toys were sent to addresses
+		if self.toy_choice_box.get() == "Yes":
+			self.toys_selected = True
+			call(["python", "life-generator.py", "1", "2"])
+			self.read_file("output.csv", toy_array, "toy_file")
+
+		# check if program was run normally or by command line
+		if self.passed_csv == 1:
+			# check if required data is provided, return if it isn't
+			if len(self.s_state.get()) == 0 or len(self.s_number.get()) == 0 or \
+			   len(self.toy_choice_box.get()) == 0:
+				self.display_generated.insert(0, "Please make selections before creating dataset")
+				return
+
+			# create variables specific to normal program
+			total = int(self.s_number.get())
+			selected_state = self.s_state.get()
+			input_file, state_ac = self.set_state(selected_state)
+		else:
+			# get the selected state and total from input.csv
+			self.read_file(sys.argv[1], csv_input_array, file_type="input_csv")
+			csv_state = csv_input_array[0]
+			total = int(csv_input_array[1])
+
+			# match the state with the state csv file
+			input_file, state_ac = self.set_state(csv_state)
+
+		# read the CSV file selected, put addresses into address_array
+		self.read_file(input_file, address_array, file_type="address_file")
+
+		# write the data to output file, and to created_array for GUI display
+		with open(output_file, mode='w', newline='') as output_csv:
+
+			# write the header to the file
+			writer = csv.writer(output_csv, delimiter=",")
+
+			# check if toy category row needs to be written
+			if self.toys_selected is False:
 				writer.writerow(("input_state", "input_number_to_generate",
 								 "output_content_type", "output_content_value"))
+			else:
+				writer.writerow(("input_state", "input_number_to_generate",
+								 "output_content_type", "output_content_value",
+								 "toy_delivered"))
 
-				# write the addresses to the file
-				i = 0
-				while i != total:
-					index = randint(0, 9999)
+			# write the addresses to the file
+			i = 0
+			while i != total:
+				index = randint(0, 9999)
 
-					# check if there's usable data retrieved
-					if address_array[index][0] == '0':
-						continue
-					elif address_array[index].find('-') != -1:
-						continue
-					elif ord(address_array[index][0]) < 49 or ord(address_array[index][0]) > 57:
-						continue
-					elif address_array[index].find('.') != -1:
-						continue
-					elif len(address_array[index]) < 5:
-						continue
-					elif address_array[index].find('&') != -1:
-						continue
-					elif address_array[index] == ' ':
-						continue
-					elif address_array[index][len(address_array[index]) - 2] == ' ':
-						continue
-					elif address_array[index][len(address_array[index]) - 1] == 'E':
-						continue
-					elif address_array[index][len(address_array[index]) - 1] == 'W':
-						continue
-					elif len(address_array[index]) != 0:
+				if self.check_index(address_array[index]) is True:
+					if self.toys_selected is False:
 						writer.writerow((state_ac, str(total), content_type, address_array[index]))
 						created_array.append(address_array[index])
-						i += 1
+					else:
+						writer.writerow((state_ac, str(total), content_type, address_array[index],
+										 toy_array[len(toy_array) % 10]))
+						created_array.append(address_array[index])
+					i += 1
 
-			# display the generated data in the GUI
-			array_size = len(created_array)
-			while array_size != 0:
-				self.display_generated.insert(0, created_array[array_size - 1])
-				array_size -= 1
+		# display the generated data in the GUI
+		array_size = len(created_array)
+		while array_size != 0:
+			self.display_generated.insert(0, created_array[array_size - 1])
+			array_size -= 1
 
 
 def main():
