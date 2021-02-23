@@ -3,7 +3,7 @@ Important lines for forking:
 23: 
 	from subprocess import call
 
-82:
+194:
 	call (["python", "life-generator.py", "1", "2")]
 
 	-this is how our programs will communicate
